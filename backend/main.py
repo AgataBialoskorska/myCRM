@@ -11,7 +11,7 @@ database_name = os.getenv('DB_NAME')
 database_uri = os.getenv('DB_URI')
 products = []
 
-engine = create_engine(f'mysql+pymysql://{username}:{password}@{database_uri}/{database_name}')
+engine = create_engine((os.environ['SQLALCHEMY_CONFIG']))
 
 @app.route('/')
 def index():
