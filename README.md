@@ -13,3 +13,12 @@ ___
 ___Command to start live servers (Flask and Vue):___
 
 `npm run my-crm` 
+
+___Command to start via Docker:___
+
+`docker build . -t mycrm`
+`docker run -d -p 8080:8080 -e SQLALCHEMY_CONFIG='mysql+pymysql://USER:PASSWORD@DATABASE_IP/DATABASE_NAME' --name mycrm mycrm`
+
+___Command to stop & remove via Docker:___
+
+`docker stop mycrm && docker rm mycrm`
