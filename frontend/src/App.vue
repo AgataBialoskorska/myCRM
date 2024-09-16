@@ -8,7 +8,7 @@
 				rowIndex: null,
 				picked: null,
 				newValue: { id: '', name: '', quantity: '', price: '', vat: '', margin: '' },
-				updateValue: { id: '', new_name: '', new_quantity: '', new_price: '', new_vat: '', new_margin: '' },
+				updateValue: { id: '', name: '', quantity: '', price: '', vat: '', margin: '' },
 			}
 		},
 		methods: {
@@ -18,7 +18,7 @@
 					this.data = response.data
 					this.columns = this.data.data.length && Object.keys(this.data.data[0])
 				} catch (error) {
-					console.error('Error fetching data:', error)
+					console.error('Vue - Error fetching data:', error)
 				}
 			},
 			async fetchDataProductsTable() {
@@ -34,7 +34,7 @@
 					console.log('Data sent successfully:', response.data)
 					await this.fetchData(endpoint)
 				} catch (error) {
-					console.error('Error sending data:', error)
+					console.error('Vue - Error sending data:', error)
 				}
 			},
 			async deleteData(endpoint, payload) {
@@ -48,7 +48,7 @@
 					console.log('Data deleted successfully:', response.data)
 					await this.fetchData(endpoint)
 				} catch (error) {
-					console.error('Error deleting data:', error)
+					console.error('Vue - Error deleting data:', error)
 				}
 			},
 			async updateData(endpoint, payload) {
@@ -58,10 +58,10 @@
 							'Content-Type': 'application/json',
 						},
 					})
-					console.log('Data sent successfully:', response.data)
+					console.log('Data updated successfully:', response.data)
 					await this.fetchData(endpoint)
 				} catch (error) {
-					console.error('Error sending data:', error)
+					console.error('Vue - Error updating data:', error)
 				}
 			},
 		},
@@ -77,8 +77,6 @@
 		</nav>
 		<div>
 			<button class="dataFetchingBtn" @click="fetchData('/api/products')">GET the data - products table</button>
-			<!-- <button class="dataFetchingBtn" @click="fetchData('/api/customers')">GET the data - customers table</button>
-			<button class="dataFetchingBtn" @click="fetchData('/api/orders')">GET the data - orders table</button> -->
 		</div>
 		<div>
 			<h2 v-if="data">Fetched Data:</h2>
@@ -114,7 +112,7 @@
 			<div>Picked: {{ picked }}</div>
 		</div>
 
-		<div v-if="(data, picked === 'Insert a record')">
+		<div v-if="(data && picked === 'Insert a record')">
 			<input type="text" placeholder="name" v-model="newValue.name" />
 			<input type="text" placeholder="quantity" v-model="newValue.quantity" />
 			<input type="text" placeholder="price" v-model="newValue.price" />
@@ -124,21 +122,21 @@
 				INSERT the data - products table
 			</button>
 		</div>
-		<div v-if="(data, picked === 'Delete a record')">
+		<div v-if="(data && picked === 'Delete a record')">
 			<input type="text" placeholder="enter ProductID" v-model="newValue.id" />
 			<button class="dataHandlingBtn" @click="deleteData('/api/products', newValue)">
 				DELETE the data from products table
 			</button>
 		</div>
-		<div v-if="(data, picked === 'Update a record')">
+		<div v-if="(data && picked === 'Update a record')">
 			<label>Which record do you want to update?</label>
 			<input type="text" placeholder="id" v-model="updateValue.id" />
 			<label>Enter new data:</label>
-			<input type="text" placeholder="name" v-model="updateValue.new_name" />
-			<input type="text" placeholder="quantity" v-model="updateValue.new_quantity" />
-			<input type="text" placeholder="price" v-model="updateValue.new_price" />
-			<input type="text" placeholder="vat" v-model="updateValue.new_vat" />
-			<input type="text" placeholder="margin" v-model="updateValue.new_margin" />
+			<input type="text" placeholder="name" v-model="updateValue.name" />
+			<input type="text" placeholder="quantity" v-model="updateValue.quantity" />
+			<input type="text" placeholder="price" v-model="updateValue.price" />
+			<input type="text" placeholder="vat" v-model="updateValue.vat" />
+			<input type="text" placeholder="margin" v-model="updateValue.margin" />
 			<button class="dataHandlingBtn" @click="updateData('/api/products', updateValue)">
 				UPDATE the data - products table
 			</button>
