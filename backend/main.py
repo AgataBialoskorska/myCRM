@@ -29,9 +29,33 @@ def post_query(data):
     )
 
 def put_query(data):
-    return text(f"UPDATE sql_inventory.products SET ProductName = :new_name WHERE ProductName = :old_name").bindparams(
-        new_name=data['new_name'], old_name=data['old_name']
-    )
+    query = "UPDATE sql_inventory.products SET "
+    params = {}
+    
+    if 'new_name' in data:
+        query += "ProductName = :new_name, "
+        params['new_name'] = data['new_name']
+    if 'new_quantity' in data:
+        query += "Quantity = :new_quantity, "
+        params['new_quantity'] = data['new_quantity']
+    if 'new_price' in data:
+        query += "Price = :new_price, "
+        params['new_price'] = data['new_price']
+    if 'new_vat' in data:
+        query += "Vat = :new_vat, "
+        params['new_vat'] = data['new_vat']
+    if 'new_margin' in data:
+        query += "Margin = :new_margin, "
+        params['new_margin'] = data['new_margin']
+
+    query = query.rstrip(', ')
+    
+    query += " WHERE ProductID = :id"
+    params['id'] = data['id']
+
+    buildQuery = text(query).bindparams(**params)
+    print(buildQuery)
+    return buildQuery
 
 def delete_query(data):
     return text(f"DELETE FROM sql_inventory.products WHERE ProductID = :id").bindparams(id=data['id'])
@@ -67,6 +91,7 @@ def handle_products():
             response = {'message': 'Product deleted successfully'}
 
         connection.commit()
+        print('data commited succesfully')
         connection.close()
 
         return jsonify(response), 200
@@ -74,42 +99,5 @@ def handle_products():
     except Exception as e:
         return jsonify({'API handling error': str(e)}), 500 
     
-# @app.route('/api/customers')
-# def get_customers():
-#     try:
-#         connection = engine.connect()
-#         query = text("SELECT * FROM sql_store.customers LIMIT 5")
-#         result = connection.execute(query)
-
-#         columns = list(result.keys())
-#         rows = [list(row) for row in result]
-
-#         connection.close()
-
-#         response = {'columns': columns, 'data': rows}
-
-#         return jsonify(response)
-    
-#     except Exception as e:
-#         return jsonify({'API handling error': str(e)}), 500
-    
-    
-# @app.route('/api/orders')
-# def get_orders():
-#     try:
-#         with engine.connect() as connection:
-#             query = text("SELECT * FROM sql_store.orders LIMIT 5")
-#             result = connection.execute(query)
-
-#             columns = list(result.keys())
-#             rows = [list(row) for row in result]
-
-#             response = {'columns': columns, 'data': rows}
-
-#         return jsonify(response)
-    
-#     except Exception as e:
-#         return jsonify({'API handling error': str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True)

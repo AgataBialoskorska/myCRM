@@ -7,7 +7,8 @@
 				data: null,
 				rowIndex: null,
 				picked: null,
-				newValue: {id: '', name: '', quantity: '', price: '', vat: '', margin: '' },
+				newValue: { id: '', name: '', quantity: '', price: '', vat: '', margin: '' },
+				updateValue: { id: '', new_name: '', new_quantity: '', new_price: '', new_vat: '', new_margin: '' },
 			}
 		},
 		methods: {
@@ -23,13 +24,7 @@
 			async fetchDataProductsTable() {
 				await this.fetchData('/api/products')
 			},
-			// async fetchDataCustomersTable() {
-			// 	await this.fetchData('/api/customers')
-			// },
-			// async fetchDataOrdersTable() {
-			// 	await this.fetchData('/api/orders')
-			// },
-			async sendData(endpoint, payload) {
+			async insertData(endpoint, payload) {
 				try {
 					const response = await this.axios.post(endpoint, payload, {
 						headers: {
@@ -54,6 +49,19 @@
 					await this.fetchData(endpoint)
 				} catch (error) {
 					console.error('Error deleting data:', error)
+				}
+			},
+			async updateData(endpoint, payload) {
+				try {
+					const response = await this.axios.put(endpoint, payload, {
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					})
+					console.log('Data sent successfully:', response.data)
+					await this.fetchData(endpoint)
+				} catch (error) {
+					console.error('Error sending data:', error)
 				}
 			},
 		},
@@ -93,7 +101,6 @@
 		</div>
 		<div v-if="data">
 			Choose the reaction:
-			<div>Picked: {{ picked }}</div>
 
 			<input type="radio" id="insert" value="Insert a record" v-model="picked" />
 			<label for="insert">Insert a record</label>
@@ -101,17 +108,20 @@
 			<input type="radio" id="delete" value="Delete a record" v-model="picked" />
 			<label for="delete">Delete a record</label>
 
-			<input type="radio" id="refresh" value="Refresh the table" v-model="picked" />
-			<label for="refresh">Refresh the table</label>
+			<input type="radio" id="update" value="Update a record" v-model="picked" />
+			<label for="update">Update a record</label>
+
+			<div>Picked: {{ picked }}</div>
 		</div>
+
 		<div v-if="(data, picked === 'Insert a record')">
 			<input type="text" placeholder="name" v-model="newValue.name" />
 			<input type="text" placeholder="quantity" v-model="newValue.quantity" />
 			<input type="text" placeholder="price" v-model="newValue.price" />
 			<input type="text" placeholder="vat" v-model="newValue.vat" />
 			<input type="text" placeholder="margin" v-model="newValue.margin" />
-			<button class="dataHandlingBtn" @click="sendData('/api/products', newValue)">
-				SEND the data - products table
+			<button class="dataHandlingBtn" @click="insertData('/api/products', newValue)">
+				INSERT the data - products table
 			</button>
 		</div>
 		<div v-if="(data, picked === 'Delete a record')">
@@ -121,12 +131,15 @@
 			</button>
 		</div>
 		<div v-if="(data, picked === 'Update a record')">
-			<input type="text" placeholder="name" v-model="newValue.name" />
-			<input type="text" placeholder="quantity" v-model="newValue.quantity" />
-			<input type="text" placeholder="price" v-model="newValue.price" />
-			<input type="text" placeholder="vat" v-model="newValue.vat" />
-			<input type="text" placeholder="margin" v-model="newValue.margin" />
-			<button class="dataHandlingBtn" @click="updateData('/api/products', newValue)">
+			<label>Which record do you want to update?</label>
+			<input type="text" placeholder="id" v-model="updateValue.id" />
+			<label>Enter new data:</label>
+			<input type="text" placeholder="name" v-model="updateValue.new_name" />
+			<input type="text" placeholder="quantity" v-model="updateValue.new_quantity" />
+			<input type="text" placeholder="price" v-model="updateValue.new_price" />
+			<input type="text" placeholder="vat" v-model="updateValue.new_vat" />
+			<input type="text" placeholder="margin" v-model="updateValue.new_margin" />
+			<button class="dataHandlingBtn" @click="updateData('/api/products', updateValue)">
 				UPDATE the data - products table
 			</button>
 		</div>
