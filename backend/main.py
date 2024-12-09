@@ -24,14 +24,42 @@ def get_query():
     return text("SELECT * FROM sql_inventory.products;")
 
 def post_query(data):
-    return text(f"INSERT INTO sql_inventory.products (ProductName, Quantity, PurchasePrice, VAT, Margin) VALUES (:name, :quantity, :price, :vat, :margin);").bindparams(
+    insertQuery = text(f"INSERT INTO sql_inventory.products (ProductName, Quantity, PurchasePrice, VAT, Margin) VALUES (:name, :quantity, :price, :vat, :margin);").bindparams(
         name=data['name'], quantity=data['quantity'], price=data['price'], vat=data['vat'], margin=data['margin']
     )
+    print(insertQuery)
+    return insertQuery
 
 def put_query(data):
-    return text(f"UPDATE sql_inventory.products SET ProductName = :new_name WHERE ProductName = :old_name").bindparams(
-        new_name=data['new_name'], old_name=data['old_name']
-    )
+    query = "UPDATE sql_inventory.products SET "
+    params = {}
+    
+    if 'name' in data and data['name']:
+        query += "ProductName = :name, "
+        params['name'] = data['name']
+    if 'quantity' in data and data['quantity']:
+        query += "Quantity = :quantity, "
+        params['quantity'] = data['quantity']
+    if 'price' in data and data['price']:
+        query += "PurchasePrice = :price, "
+        params['price'] = data['price']
+    if 'vat' in data and data['vat']:
+        query += "Vat = :vat, "
+        params['vat'] = data['vat']
+    if 'margin' in data and data['margin']:
+        query += "Margin = :margin, "
+        params['margin'] = data['margin']
+
+    query = query.rstrip(', ')
+    
+    query += " WHERE ProductID = :id"
+    params['id'] = data['id']
+
+    buildQuery = text(query).bindparams(**params)
+    
+    print("Generated query:", query)
+    print("With params:", params)    
+    return buildQuery
 
 def delete_query(data):
     return text(f"DELETE FROM sql_inventory.products WHERE ProductID = :id").bindparams(id=data['id'])
@@ -43,6 +71,7 @@ def handle_products():
 
         if request.method == 'GET':
             query = get_query()
+            print("query")
             result = connection.execute(query)
             columns = list(result.keys())
             rows = [list(row) for row in result]
@@ -51,12 +80,14 @@ def handle_products():
         elif request.method == 'POST':
             newValue = request.json 
             query = post_query(newValue)
+            print("query")
             connection.execute(query)
             response = {'message': 'Product added successfully', 'data': newValue}
 
         elif request.method == 'PUT':
             updateValue = request.json
             query = put_query(updateValue)
+            print("query")
             connection.execute(query)
             response = {'message': 'Product updated successfully'}
 
@@ -72,44 +103,7 @@ def handle_products():
         return jsonify(response), 200
 
     except Exception as e:
-        return jsonify({'API handling error': str(e)}), 500 
+        return jsonify({'Error: handle_products()': str(e)}), 500 
     
-# @app.route('/api/customers')
-# def get_customers():
-#     try:
-#         connection = engine.connect()
-#         query = text("SELECT * FROM sql_store.customers LIMIT 5")
-#         result = connection.execute(query)
-
-#         columns = list(result.keys())
-#         rows = [list(row) for row in result]
-
-#         connection.close()
-
-#         response = {'columns': columns, 'data': rows}
-
-#         return jsonify(response)
-    
-#     except Exception as e:
-#         return jsonify({'API handling error': str(e)}), 500
-    
-    
-# @app.route('/api/orders')
-# def get_orders():
-#     try:
-#         with engine.connect() as connection:
-#             query = text("SELECT * FROM sql_store.orders LIMIT 5")
-#             result = connection.execute(query)
-
-#             columns = list(result.keys())
-#             rows = [list(row) for row in result]
-
-#             response = {'columns': columns, 'data': rows}
-
-#         return jsonify(response)
-    
-#     except Exception as e:
-#         return jsonify({'API handling error': str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True)
